@@ -11,6 +11,7 @@ import ij.gui.Plot;
 import ij.measure.CurveFitter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.Object3DVoxels;
 import mcib3d.geom.Voxel3D;
@@ -47,7 +48,7 @@ import mcib3d.utils.ThreadUtil;
  */
 public class Segment3DSpots {
 
-    ArrayList<Object3D> segmentedObjects = null;
+    LinkedList<Object3D> segmentedObjects = null;
     ImageHandler rawImage; // raw image
     ImageHandler seedsImage; // positions of seeds
     ImageInt watershedImage = null; // watershed from seeds
@@ -162,7 +163,7 @@ public class Segment3DSpots {
      *
      * @return
      */
-    public ArrayList<Object3D> getObjects() {
+    public LinkedList<Object3D> getObjects() {
         return segmentedObjects;
     }
 
@@ -437,8 +438,8 @@ public class Segment3DSpots {
      *
      */
     public void segmentAll() {
-        segmentedObjects = new ArrayList();
-        ArrayList<Voxel3D> obj;
+        segmentedObjects = new LinkedList();
+        LinkedList<Voxel3D> obj;
         Voxel3D vox;
         int o = 1;
         int localThreshold = localValue;
@@ -483,7 +484,7 @@ public class Segment3DSpots {
                                 break;
                         }
                         if ((obj != null) && (obj.size() >= volMin) && (obj.size() <= volMax)) {
-                            segmentedObjects.add(new Object3DVoxels(obj));
+                            segmentedObjects.add(new Object3DVoxels​(obj));
                             o++;
                         } else if (obj != null) {
                             // erase from label image
@@ -502,9 +503,9 @@ public class Segment3DSpots {
         }
     }
 
-    public ArrayList<Voxel3D> segmentOneSpot(int x, int y, int z, int o) {
+    public LinkedList<Voxel3D> segmentOneSpot(int x, int y, int z, int o) {
         int localThreshold = localValue;
-        ArrayList<Voxel3D> obj;
+        LinkedList<Voxel3D> obj;
         // LOCAL THRESHOLD
         if (localMethod == LOCAL_MEAN) {
             localThreshold = (int) localMean(x, y, z);
@@ -659,7 +660,7 @@ public class Segment3DSpots {
      * @param val
      * @return
      */
-    public ArrayList<Voxel3D> segmentSpotBlock(int xdep, int ydep, int zdep, int lcThreshold, int val) {
+    public LinkedList<Voxel3D> segmentSpotBlock(int xdep, int ydep, int zdep, int lcThreshold, int val) {
         boolean changement = true;
         int xfin = xdep + 1;
         int yfin = ydep + 1;
@@ -674,7 +675,7 @@ public class Segment3DSpots {
             return null;
         }
         labelImage.setPixel(xdep, ydep, zdep, value);
-        ArrayList<Voxel3D> object = new ArrayList();
+        LinkedList<Voxel3D> object = new LinkedList();
         object.add(new Voxel3D(xdep, ydep, zdep, value));
         int volume = 1;
         int i;
@@ -816,7 +817,7 @@ public class Segment3DSpots {
      * @param zdep z coordinate of the seed
      * @return true if object cold be segmented
      */
-    public ArrayList<Voxel3D> segmentSpotClassical(int xdep, int ydep, int zdep, int lcThreshold, int val) {
+    public LinkedList<Voxel3D> segmentSpotClassical(int xdep, int ydep, int zdep, int lcThreshold, int val) {
         boolean changement = true;
         int xfin = xdep + 1;
         int yfin = ydep + 1;
@@ -831,7 +832,7 @@ public class Segment3DSpots {
             return null;
         }
         labelImage.setPixel(xdep, ydep, zdep, value);
-        ArrayList<Voxel3D> object = new ArrayList();
+        LinkedList<Voxel3D> object = new LinkedList();
         object.add(new Voxel3D(xdep, ydep, zdep, value));
         int volume = 1;
         int i;
@@ -918,7 +919,7 @@ public class Segment3DSpots {
      * @param zdep z coordinate of the seed
      * @return true if object cold be segmented
      */
-    public ArrayList<Voxel3D> segmentSpotMax(int xdep, int ydep, int zdep, int lcThreshold, int val) {
+    public LinkedList<Voxel3D> segmentSpotMax(int xdep, int ydep, int zdep, int lcThreshold, int val) {
         boolean changement = true;
         int xfin = xdep + 1;
         int yfin = ydep + 1;
@@ -937,7 +938,7 @@ public class Segment3DSpots {
         }
         labelImage.setPixel(xdep, ydep, zdep, value);
         //volume++;
-        ArrayList<Voxel3D> object = new ArrayList();
+        LinkedList<Voxel3D> object = new LinkedList();
         object.add(new Voxel3D(xdep, ydep, zdep, value));
 
         int i;
@@ -1011,7 +1012,7 @@ public class Segment3DSpots {
     // FIXME a revoir, notamment dist ??
 
     public static Object3DVoxels[] splitSpotWatershed(Object3D obj, float rad, float dist) {
-        ImageInt seg = obj.createSegImage(0, 0, 0, obj.getXmax() + 1, obj.getYmax() + 1, obj.getZmax() + 1, 255);
+        ImageHandler seg = obj.createSegImage(0, 0, 0, obj.getXmax() + 1, obj.getYmax() + 1, obj.getZmax() + 1, 255);
         //seg.show();
         ImagePlus segplus = seg.getImagePlus();
         segplus.setCalibration(obj.getCalibration());
@@ -1026,7 +1027,7 @@ public class Segment3DSpots {
             ImageStack localMax = FastFilters3D.filterFloatImageStack(edt3d.getImageStack(), FastFilters3D.MAXLOCAL, rad, rad, rad, cpus, false);
             ImageFloat maxlocal3d = new ImageFloat(localMax);
             //new ImagePlus("max", maxlocal3d.getStack()).show();
-            ArrayList<Voxel3D> locals = obj.listVoxels(maxlocal3d, 0);
+            LinkedList<Voxel3D> locals = obj.listVoxels(maxlocal3d, 0);
 
             int nb = locals.size();
             // IJ.log("nb=" + nb);
@@ -1200,8 +1201,8 @@ public class Segment3DSpots {
          *
          */
         // with ArrayList
-        ArrayList<Voxel3D> list = f.getVoxels();
-        ArrayList<Voxel3D> maxlo = new ArrayList<Voxel3D>();
+        LinkedList<Voxel3D> list = f.getVoxels();
+        ArrayList<Voxel3D> maxlo = new ArrayList<>();
 
         Iterator it = list.iterator();
         int xx, yy, zz;
